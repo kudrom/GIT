@@ -10,3 +10,15 @@ tr.text-primary{
 footer{
     margin: 30px 0 10px 0;
 }
+
+.resumen-incidencia h4{
+    display: inline;
+}
+
+.dato{
+    margin: 5px 0;
+}
+
+.comentarios{
+    margin-top: 20px;
+}
