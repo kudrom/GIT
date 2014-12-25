@@ -1,0 +1,12 @@
+.table-hover > tbody > tr:hover{
+    background-color: #E5D664;
+    cursor: pointer;
+}
+
+tr.text-primary{
+    font-weight: bold;
+}
+
+footer{
+    margin: 30px 0 10px 0;
+}
