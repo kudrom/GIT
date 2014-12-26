@@ -1,25 +1,86 @@
-{% extends "base.html" %}
-{% block title %}Login{% endblock %}
-{% block head %}
-    <style>
-        .cuadro{
-        }
-    </style>
-{% endblock %}
+<!DOCTYPE html>
+<html lang="es">
+    <head>
+        <title>GIT</title>
+        <meta charset="utf-8">
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap-theme.min.css">
+        <link rel="stylesheet" href="/static/base.css">
+        <style>
+            html, body, .wrapper{
+                height: 100%;
+                overflow: hidden;
+            }
 
-{% block contenido %}
-    <form action="/login" method="post" class="form-horizontal col-xs-4">
-        {% csrf_token %}
-        <div class="cuadro">
-            <div class="form-group">
-                <label class="col-xs-4" for="usuario">Usuario:</label>
-                <input class="col-xs-8" type="text" class="form-control" name="usuario" placeholder="Introduce tu nombre de usuario">
-            </div>
-            <div class="form-group">
-                <label class="col-xs-4" for="password">Contraseña:</label>
-                <input class="col-xs-8" type="password" class="form-control" name="password" placeholder="Introduce tu contraseña">
-            </div>
-            <button type="submit" class="btn btn-primary">Enviar</button>
+            .wrapper{
+                position: relative;
+                background: #d6d6d6; /* Old browsers */
+                background: -moz-radial-gradient(center, ellipse cover, #d6d6d6 0%, #3e4149 100%); /* FF3.6+ */
+                background: -webkit-gradient(radial, center center, 0px, center center, 100%, color-stop(0%,#d6d6d6), color-stop(100%,#3e4149)); /* Chrome,Safari4+ */
+                background: -webkit-radial-gradient(center, ellipse cover, #d6d6d6 0%,#3e4149 100%); /* Chrome10+,Safari5.1+ */
+                background: -o-radial-gradient(center, ellipse cover, #d6d6d6 0%,#3e4149 100%); /* Opera 12+ */
+                background: -ms-radial-gradient(center, ellipse cover, #d6d6d6 0%,#3e4149 100%); /* IE10+ */
+                background: radial-gradient(ellipse at center, #d6d6d6 0%,#3e4149 100%); /* W3C */
+                filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#d6d6d6', endColorstr='#3e4149',GradientType=1 ); /* IE6-9 fallback on horizontal gradient */
+            }
+
+            form{
+                margin: 0 auto;
+                width: 330px;
+                border-radius: 5px;
+                box-shadow: #555 0 0 10px;
+                padding: 10px 15px;
+                position: relative;
+                top: 35%;
+                z-index: 10;
+                background: #eee;
+            }
+
+            .grupo{
+                margin: 0 0 10px 0;
+            }
+
+            .grupo label{
+                width: 90px;
+            }
+
+            .grupo input{
+                width: 205px;
+            }
+
+            footer{
+                position: absolute;
+                left: 10px;
+                bottom: -10px;
+                color: #eee;
+            }
+
+            @media (max-height: 300px){
+                form{
+                    top: 20%;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <div class="wrapper">
+            <form action="/login" method="post">
+                {% csrf_token %}
+                <div class="cuadro">
+                    <div class="grupo">
+                        <label class="" for="usuario">Usuario:</label>
+                        <input class="" type="text" name="usuario" placeholder="Introduce tu nombre de usuario">
+                    </div>
+                    <div class="grupo">
+                        <label class="" for="password">Contraseña:</label>
+                        <input class="" type="password" name="password" placeholder="Introduce tu contraseña">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Enviar</button>
+                </div>
+            </form>
+            <footer>
+                <p>Sistema realizado por Oscar Gonzalez, Alejandro López, Miguel Sánchez y Stoyan Veselinov</p>
+            </footer>
         </div>
-    </form>
-{% endblock %}
+    </body>
+</html>
