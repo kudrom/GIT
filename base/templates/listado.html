@@ -1,5 +1,9 @@
 {% extends "base.html" %}
 {% block title %} Listado {% endblock %}
+{% block navegacion %}
+    {% include "navegacion.html" %}
+{% endblock %}
+
 {% block contenido %}
     <h1>Listado de incidencias</h1>
     <table class="table table-striped table-hover">

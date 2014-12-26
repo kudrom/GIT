@@ -20,7 +20,9 @@ def error(request, tipo):
 
 def home(request):
     if request.user.is_authenticated():
-        return render(request, 'listado.html', {})
+        grupos = [g.name for g in request.user.groups.all()]
+        context = {'grupos': grupos}
+        return render(request, 'listado.html', context)
     else:
         return render(request, 'login.html', {})
 
@@ -46,41 +48,59 @@ def logout_procesar(request):
 
 @login_required
 def perfil(request):
-    return render(request, 'perfil.html', {})
+    grupos = [g.name for g in request.user.groups.all()]
+    context = {'peticion': 'perfil', 'grupos': grupos}
+
+    return render(request, 'perfil.html', context)
 
 @login_required
 def ayuda(request):
-    return render(request, 'ayuda.html', {})
+    grupos = [g.name for g in request.user.groups.all()]
+    context = {'peticion': 'ayuda', 'grupos': grupos}
+
+    return render(request, 'ayuda.html', context)
 
 @login_required
 def incidencia(request, id_incidencia):
-    context = {'identidad': id_incidencia}
+    grupos = [g.name for g in request.user.groups.all()]
+    context = {'grupos': grupos}
+
     return render(request, 'resumen-incidencia.html', context)
 
 
 @login_required
 def nueva_incidencia(request):
+    grupos = [g.name for g in request.user.groups.all()]
+    context = {'peticion': 'nueva_incidencia', 'grupos': grupos}
     clientes = Group.objects.get(name='clientes')
+    print(grupos)
+
     if clientes in request.user.groups.all():
-        return render(request, 'abrir-incidencia.html', {})
+        return render(request, 'abrir-incidencia.html', context)
     else:
         return redirect('/')
 
 
 @login_required
 def estadisticas(request):
+    grupos = [g.name for g in request.user.groups.all()]
+    context = {'peticion': 'estadisticas', 'grupos': grupos}
     supervisores = Group.objects.get(name='supervisores')
+
     if supervisores in request.user.groups.all():
-        return render(request, 'estadisticas.html', {})
+        return render(request, 'estadisticas.html', context)
     else:
         return redirect('/')
 
 
 @login_required
 def notificaciones(request):
+    grupos = [g.name for g in request.user.groups.all()]
+    context = {'peticion': 'notificaciones', 'grupos': grupos}
     supervisores = Group.objects.get(name='supervisores')
     tecnicos = Group.objects.get(name='tecnicos')
+
     if supervisores in request.user.groups.all() or tecnicos in request.user.groups.all():
-        return render(request, 'notificaciones.html', {})
+        return render(request, 'notificaciones.html', context)
     else:
         return redirect('/')

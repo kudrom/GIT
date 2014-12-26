@@ -1,8 +1,12 @@
 {% extends "base.html" %}
+{% block title %}Incidencia A{% endblock %}
 {% block head %}
     <link rel="stylesheet" href="/static/bootstrap-select/bootstrap-select.min.css">
 {% endblock %}
-{% block title %}Incidencia A{% endblock %}
+{% block navegacion %}
+    {% include "navegacion.html" %}
+{% endblock %}
+
 {% block contenido %}
     <div class="resumen-incidencia">
         <h1>Incidencia A</h1>

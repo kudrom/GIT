@@ -3,6 +3,10 @@
 {% block head %}
     <link rel="stylesheet" href="/static/bootstrap-select/bootstrap-select.min.css">
 {% endblock %}
+{% block navegacion %}
+    {% include "navegacion.html" %}
+{% endblock %}
+
 {% block contenido %}
     <form>
         <div class="form-group">
@@ -29,6 +33,7 @@
         <button type="submit" class="btn btn-primary">Enviar</button>
     </form>
 {% endblock %}
+
 {% block scripts %}
     <script src="/static/bootstrap-select/bootstrap-select.js"></script>
     <script src="/static/bootstrap-select/defaults-es_CL.js"></script>
