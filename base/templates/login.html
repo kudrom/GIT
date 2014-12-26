@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}Login{% endblock %}
+{% block navegacion %}{% endblock %}
+{% block head %}
+    <style>
+        .cuadro{
+        }
+    </style>
+{% endblock %}
+
+{% block contenido %}
+    <form action="/login" method="post" class="form-horizontal col-xs-4">
+        {% csrf_token %}
+        <div class="cuadro">
+            <div class="form-group">
+                <label class="col-xs-4" for="usuario">Usuario:</label>
+                <input class="col-xs-8" type="text" class="form-control" name="usuario" placeholder="Introduce tu nombre de usuario">
+            </div>
+            <div class="form-group">
+                <label class="col-xs-4" for="password">Contraseña:</label>
+                <input class="col-xs-8" type="password" class="form-control" name="password" placeholder="Introduce tu contraseña">
+            </div>
+            <button type="submit" class="btn btn-primary">Enviar</button>
+        </div>
+    </form>
+{% endblock %}
