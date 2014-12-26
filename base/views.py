@@ -8,7 +8,8 @@ def nueva_incidencia(request):
     return render(request, 'abrir-incidencia.html', {})
 
 def incidencia(request, id_incidencia):
-    return render(request, 'resumen-incidencia.html', {})
+    context = {'identidad': id_incidencia}
+    return render(request, 'resumen-incidencia.html', context)
 
 def listado(request):
     return render(request, 'listado.html', {})
@@ -18,3 +19,9 @@ def notificaciones(request):
 
 def perfil(request):
     return render(request, 'perfil.html', {})
+
+def estadisticas(request):
+    return render(request, 'estadisticas.html', {})
+
+def ayuda(request):
+    return render(request, 'ayuda.html', {})

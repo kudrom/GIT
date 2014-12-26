@@ -12,6 +12,8 @@ urlpatterns = patterns('',
     url(r'^listado$', 'base.views.listado'),
     url(r'^notificaciones$', 'base.views.notificaciones'),
     url(r'^perfil$', 'base.views.perfil'),
+    url(r'^estadisticas$', 'base.views.estadisticas'),
+    url(r'^ayuda$', 'base.views.ayuda'),
 
     url(r'^admin/', include(admin.site.urls)),
 )
