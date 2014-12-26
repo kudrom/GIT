@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="es">
+    <head>
+        <title>GIT | Perfil</title>
+        <meta charset="utf-8">
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap-theme.min.css">
+        <link rel="stylesheet" href="./base.css">
+    </head>
+    <body>
+        <nav role="navigation" class="navbar navbar-default">
+            <div class="navbar-header">
+                <button type="button" data-target="#navbarCollapse" data-toggle="collapse" class="navbar-toggle">
+                    <span class="sr-only">Cambiar navegación</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a href="./listado.html" class="navbar-brand"><span class="glyphicon glyphicon-home active" aria-hidden="true"></span></a>
+            </div>
+            <div id="navbarCollapse" class="collapse navbar-collapse">
+                <ul class="nav navbar-nav">
+                    <li><a href="./notificaciones.html"><span class="glyphicon glyphicon-bell" aria-hidden="true"></span> Notificaciones <span class="badge">14</span></a></li>
+                    <li><a href="#"><span class="glyphicon glyphicon-stats" aria-hidden="true"></span> Estadisticas</a></li>
+                </ul>
+                <ul class="nav navbar-nav navbar-right">
+                    <li><a href="#"><span class="glyphicon glyphicon-question-sign" aria-hidden="true"></span> Ayuda</a></li>
+                    <li class="active"><a href="./perfil.html"><span class="glyphicon glyphicon-user" aria-hidden="true"></span> Perfil</a></li>
+                    <li><a href="#"><span class="glyphicon glyphicon-log-out" aria-hidden="true"></span> Salir</a></li>
+                </ul>
+            </div>
+        </nav>
+
+        <div class="container">
+            <form>
+                <div class="panel panel-default">
+                    <div class="panel-heading">Datos personales</div>
+                    <div class="panel-body">
+                        <div class="form-group">
+                            <label for="nombre">Nombre</label>
+                            <input type="text" class="form-control" id="nombre" placeholder="Introduce tu nombre" value="Fulanito">
+                        </div>
+                        <div class="form-group">
+                            <label for="apellidos">Apellidos</label>
+                            <input type="text" class="form-control" id="apellidos" placeholder="Introduce tus apellidos">
+                        </div>
+                        <div class="form-group">
+                            <label for="email">Dirección de email</label>
+                            <input type="email" class="form-control" id="email" placeholder="Introduce tu email">
+                        </div>
+                    </div>
+                </div>
+                <div class="panel panel-default">
+                    <div class="panel-heading">Cambiar contraseña</div>
+                    <div class="panel-body">
+                        <div class="form-group">
+                            <label for="password-actual">Contraseña actual</label>
+                            <input type="password" class="form-control" id="password-actual" placeholder="Introduce tu constraseña actual">
+                        </div>
+                        <div class="form-group">
+                            <label for="password-nuevo">Nueva contraseña</label>
+                            <input type="password" class="form-control" id="password-nuevo" placeholder="Introduce tu nueva constraseña">
+                        </div>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary">Submit</button>
+            </form>
+            <div class="row">
+                <div class="col-xs-12">
+                    <footer>
+                        <p>Realizado por Oscar Gonzalez, Alejandro López, Miguel Sánchez y Stoyan Veselinev</p>
+                    </footer>
+                </div>
+            </div>
+        </div>
+        <script src="//code.jquery.com/jquery-1.11.2.min.js"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
+    </body>
+</html>
