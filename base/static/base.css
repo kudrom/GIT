@@ -1,6 +1,7 @@
 .table-hover > tbody > tr:hover{
-    background-color: #E5D664;
+    background-color: #ED8544;
     cursor: pointer;
+    color: white;
 }
 
 tr.text-primary{
