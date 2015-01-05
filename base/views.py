@@ -4,6 +4,7 @@ from django.contrib.auth.models import Group
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 
+from base.models import NuevaIncidencia
 
 def error(request, tipo):
     context = {}
@@ -73,9 +74,17 @@ def nueva_incidencia(request):
     grupos = [g.name for g in request.user.groups.all()]
     context = {'peticion': 'nueva_incidencia', 'grupos': grupos}
     clientes = Group.objects.get(name='clientes')
-    print(grupos)
 
     if clientes in request.user.groups.all():
+        if request.method == 'POST':
+            form = NuevaIncidencia(request.POST)
+            if form.is_valid():
+                # TODO: implementar mensajes en listado.html
+                form.save()
+                return redirect('/')
+        else:
+            form = NuevaIncidencia()
+            context['form'] = form
         return render(request, 'abrir-incidencia.html', context)
     else:
         return redirect('/')

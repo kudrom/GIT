@@ -1,45 +1,35 @@
 {% extends "base.html" %}
+{% load addclass %}
 {% block title %} Abrir nueva incidencia {% endblock %}
 {% block head %}
     <link rel="stylesheet" href="/static/bootstrap-select/bootstrap-select.min.css">
+    <style>
+        .fecha_apertura{
+            display: inline;
+            width: 120px;
+        }
+    </style>
 {% endblock %}
 {% block navegacion %}
     {% include "navegacion.html" %}
 {% endblock %}
 
 {% block contenido %}
-    <form>
-        <div class="form-group">
-            <label for="nombre">Nombre</label>
-            <input type="text" class="form-control" id="nombre" placeholder="Introduce el nombre que quieras asignar a la incidencia" value="Fulanito">
-        </div>
-        <div class="form-group">
-            <label for="nombre">Descripción</label>
-            <textarea class="form-control" rows="3"></textarea>
-        </div>
-        <div class="form-group">
-            <label for="inventario" style="display: block;">Inventario relacionado</label>
-            <select class="selectpicker" multiple id="inventario">
-                <option value="ordenador21">Ordenador21</option>
-                <option value="ordenador22">Ordenador22</option>
-                <option value="ordenador23">Ordenador23</option>
-                <option value="ordenador24">Ordenador24</option>
-            </select>
-        </div>
-        <div class="form-group">
-            <label for="etiquetas">Etiquetas</label>
-            <input type="text" class="form-control" id="etiquetas" placeholder="Introduce las etiquetas que quieras separadas por comas">
-        </div>
+    <form action="./incidencia" method="post">
+        {% csrf_token %}
+        {% for field in form %}
+            <div class="form-group">
+                {{ field.errors }}
+                {{ field.label_tag }}
+                {% if field.label == 'Fecha apertura' %}
+                    <div>
+                        {{ field }}
+                    </div>
+                {% else %}
+                    {{ field|addclass:'form-control' }}
+                {% endif %}
+            </div>
+        {% endfor %}
         <button type="submit" class="btn btn-primary">Enviar</button>
     </form>
-{% endblock %}
-
-{% block scripts %}
-    <script src="/static/bootstrap-select/bootstrap-select.js"></script>
-    <script src="/static/bootstrap-select/defaults-es_CL.js"></script>
-    <script>
-        $(document).ready(function(){
-            $("inventario").selectpicker();
-        });
-    </script>
 {% endblock %}
