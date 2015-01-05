@@ -1,7 +1,7 @@
 from django.contrib.auth.models import User
 from django import forms
 from django.forms import extras
-from base.models import Incidencia, ElementoInventario
+from base.models import Incidencia, ElementoInventario, CambioEstado
 
 
 class NuevaIncidencia(forms.ModelForm):
@@ -14,14 +14,7 @@ class NuevaIncidencia(forms.ModelForm):
             'categoria': forms.Select(),
         }
 
-class SupervisorIncidencia(forms.Form):
-    prioridad = forms.IntegerField()
-    inventario = forms.ModelChoiceField(ElementoInventario.objects.all())
-    tecnico = forms.ModelChoiceField(User.objects.filter(groups__name="tecnicos"))
-
-    def save(self, id_incidencia):
-        incidencia = Incidencia.objects.get(id=id_incidencia)
-        incidencia.prioridad = self.cleaned_data['prioridad']
-        incidencia.inventario = self.cleaned_data['inventario']
-        incidencia.tecnico = self.cleaned_data['tecnico']
-        incidencia.save()
+class SupervisorIncidencia(forms.ModelForm):
+    class Meta:
+        model = Incidencia
+        fields = ['prioridad', 'inventario', 'tecnico_asignado']

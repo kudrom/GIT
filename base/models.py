@@ -50,3 +50,10 @@ class CambioEstado(models.Model):
     estado_inicial = models.CharField(max_length=2, choices=ESTADOS, default='SO')
     estado_final = models.CharField(max_length=2, choices=ESTADOS, default='AC')
     nuevo = models.BooleanField(default=True)
+
+""" Crear el cambio estado cuando se cree una incidencia"""
+def receiver():
+    cambio_estado = CambioEstado(incidencia=self,
+                                 usuario=self.autor,
+                                 nuevo=True)
+    cambio_estado.save()
