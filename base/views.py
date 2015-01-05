@@ -4,7 +4,8 @@ from django.contrib.auth.models import Group
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 
-from base.models import NuevaIncidencia
+from base.models import Incidencia
+from base.forms import SupervisorIncidencia, NuevaIncidencia
 
 def error(request, tipo):
     context = {}
@@ -14,6 +15,8 @@ def error(request, tipo):
         context['mensaje'] = 'El usuario no existe.'
     elif tipo.startswith('login'):
         context['mensaje'] = 'Ha habido un error en el login.'
+    elif tipo == "incidencia-invalida":
+        context['mensaje'] = 'La incidencia no existe.'
     else:
         context['mensaje'] = 'Algo misterioso ha ocurrido.'
     return render(request, 'error.html', context)
@@ -65,8 +68,25 @@ def ayuda(request):
 def incidencia(request, id_incidencia):
     grupos = [g.name for g in request.user.groups.all()]
     context = {'grupos': grupos}
-
-    return render(request, 'resumen-incidencia.html', context)
+    if request.method == 'POST':
+        form = SupervisorIncidencia(request.POST)
+        if form.is_valid():
+            incidencia = form.save(id_incidencia)
+            incidencia.supervisor = request.user
+            incidencia.save()
+            return redirect('/')
+        else:
+            request.POST = None
+            context['form'] = form
+    try:
+        incidencia = Incidencia.objects.get(id=id_incidencia)
+        if incidencia is not None:
+            context['incidencia'] = incidencia
+            if 'form' not in context:
+                context['form'] = SupervisorIncidencia()
+            return render(request, 'resumen-incidencia.html', context)
+    except Incidencia.DoesNotExist:
+        return redirect('/error/incidencia-invalida')
 
 
 @login_required
@@ -80,8 +100,12 @@ def nueva_incidencia(request):
             form = NuevaIncidencia(request.POST)
             if form.is_valid():
                 # TODO: implementar mensajes en listado.html
-                form.save()
+                incidencia = form.save()
+                incidencia.autor = request.user
+                incidencia.save()
                 return redirect('/')
+            else:
+                context['form'] = form
         else:
             form = NuevaIncidencia()
             context['form'] = form

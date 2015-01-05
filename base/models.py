@@ -1,7 +1,5 @@
 from django.db import models
 from django.contrib.auth.models import User
-from django import forms
-from django.forms import extras
 import datetime
 
 ESTADOS = (
@@ -21,10 +19,13 @@ CATEGORIAS = (
         )
 
 class ElementoInventario(models.Model):
+    nombre = models.CharField(max_length=40, default="")
     precio_compra = models.FloatField()
     fecha_compra = models.DateField(default=datetime.datetime.today)
-    tipo = models.CharField(max_length=8)
     caracteristicas = models.CharField(max_length=200)
+
+    def __str__(self):
+        return self.nombre
 
 class Incidencia(models.Model):
     nombre = models.CharField(max_length=100)
@@ -40,7 +41,7 @@ class Incidencia(models.Model):
 
     tecnico_asignado = models.ForeignKey(User, null=True, blank=True, related_name="tecnico_asignado")
     supervisor = models.ForeignKey(User, null=True, blank=True, related_name="supervisor")
-    cliente = models.ForeignKey(User, null=True, blank=True, related_name="cliente")
+    autor = models.ForeignKey(User, null=True, blank=True, related_name="autor")
 
 class CambioEstado(models.Model):
     incidencia = models.ForeignKey(Incidencia)
@@ -49,13 +50,3 @@ class CambioEstado(models.Model):
     estado_inicial = models.CharField(max_length=2, choices=ESTADOS, default='SO')
     estado_final = models.CharField(max_length=2, choices=ESTADOS, default='AC')
     nuevo = models.BooleanField(default=True)
-
-class NuevaIncidencia(forms.ModelForm):
-    class Meta:
-        model = Incidencia
-        fields = ['nombre', 'descripcion', 'fecha_apertura', 'categoria']
-        widgets = {
-            'descripcion': forms.Textarea(attrs={'rows': 3}),
-            'fecha_apertura': extras.SelectDateWidget(attrs={'class': 'form-control fecha_apertura'}),
-            'categoria': forms.Select(),
-        }

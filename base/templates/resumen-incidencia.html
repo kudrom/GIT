@@ -1,51 +1,46 @@
 {% extends "base.html" %}
 {% block title %}Incidencia A{% endblock %}
-{% block head %}
-    <link rel="stylesheet" href="/static/bootstrap-select/bootstrap-select.min.css">
-{% endblock %}
 {% block navegacion %}
     {% include "navegacion.html" %}
 {% endblock %}
 
 {% block contenido %}
     <div class="resumen-incidencia">
-        <h1>Incidencia A</h1>
+        <h1>{{ incidencia.nombre }}</h1>
         <div class="col-md-4">
             <div class="dato">
-                <h4>Número: </h4><span>{{ identidad }}</span>
+                <h4>Número: </h4><span>{{ incidencia.id }}</span>
             </div>
             <div class="dato">
-                <h4>Fecha Apertura: </h4><span>11/12/2014</span>
+                <h4>Fecha Apertura: </h4><span>{{ incidencia.fecha_apertura }}</span>
             </div>
             <div class="dato">
-                <h4>Autor: </h4><span>Perico el de los palotes</span>
+                <h4>Autor: </h4><span>{{ incidencia.autor }}</span>
             </div>
             <div class="dato">
-                <h4>Técnico Asignado: </h4>
-                <select class="selectpicker" id="asignacion" data-width="120px">
-                    <option value=""></option>
-                    <option value="miguel">Miguel</option>
-                    <option value="lucas">Lucas</option>
-                    <option value="carolina">Carolina</option>
-                    <option value="francisco">Francisco</option>
-                </select>
+                <h4>Estado: </h4><span>{{ incidencia.estado }}</span>
             </div>
             <div class="dato">
-                <h4>Estado: </h4><span>Creada</span>
+                <h4>Categoria: </h4><span>{{ incidencia.categoria }}</span>
             </div>
-            <div class="dato">
-                <h4>Tags: </h4><span>miel, cecina</span>
-            </div>
+            {% if "supervisores" not in grupos %}
+                <div class="dato">
+                    <h4>Técnico Asignado: </h4><span>{{ incidencia.tecnico_asignado|default:"--" }}</span>
+                </div>
+                <div class="dato">
+                    <h4>Prioridad: </h4><span>{{ incidencia.prioridad|default:"--" }}</span>
+                </div>
+                <div class="dato">
+                    <h4>Inventario afectado: </h4><span>{{ incidencia.inventario|default:"--" }}</span>
+                </div>
+            {% endif %}
         </div>
     </div>
 
     <div class="col-md-8">
-        <h4>Resumen:</h4>
+        <h4>Descripcion:</h4>
         <div>
-            <p>Lorem Ipsum is simply dummy text of the printing and typesetting industry.</p>
-            <p>Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book.</p>
-            <p>It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged.</p>
-            <p>It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.</p>
+            {{ incidencia.descripcion }}
         </div>
     </div>
 
@@ -66,21 +61,23 @@
             </div>
         </div>
     </div>
+    {% if "supervisores" in grupos %}
+        <form method="post" action="/incidencia/{{ incidencia.id }}">
+            {% include "formulario.html" %}
+        </form>
 
-    <form>
-        <textarea class="form-control" rows="4"></textarea>
-        <button style="margin-top: 5px" type="submit" class="btn btn-primary">Enviar comentario</button>
-    </form>
+    {% endif %}
+    {% if "tecnicos" in grupos %}
+        <form>
+            <textarea class="form-control" rows="4"></textarea>
+            <button style="margin-top: 5px" type="submit" class="btn btn-primary">Enviar comentario</button>
+        </form>
+        <a class="btn btn-primary" href="/cerrar?tipo=exito&incidencia={{ incidencia.id }}" style="margin-top: 20px;">Cerrar con éxito</a>
+        <a class="btn btn-danger" href="/cerrar?tipo=fracaso&incidencia={{ incidencia.id }}" style="margin-top: 20px;">Cerrar con fracaso</a>
 
-    <input type="button" class="btn btn-primary" value="Asignar técnico" style="margin-top: 20px;">
-{% endblock %}
+    {% endif %}
+    {% if "clientes" in grupos %}
+        <a class="btn btn-primary" href="/cerrar?tipo=prematuro&incidencia={{ incidencia.id }}" style="margin-top: 20px;">Cerrar</a>
+    {% endif %}
 
-{% block scripts %}
-    <script src="/static/bootstrap-select/bootstrap-select.js"></script>
-    <script src="/static/bootstrap-select/defaults-es_CL.js"></script>
-    <script>
-        $(document).ready(function(){
-            $("asignacion").selectpicker();
-        });
-    </script>
 {% endblock %}

@@ -1,8 +1,6 @@
 {% extends "base.html" %}
-{% load addclass %}
 {% block title %} Abrir nueva incidencia {% endblock %}
 {% block head %}
-    <link rel="stylesheet" href="/static/bootstrap-select/bootstrap-select.min.css">
     <style>
         .fecha_apertura{
             display: inline;
@@ -16,20 +14,6 @@
 
 {% block contenido %}
     <form action="./incidencia" method="post">
-        {% csrf_token %}
-        {% for field in form %}
-            <div class="form-group">
-                {{ field.errors }}
-                {{ field.label_tag }}
-                {% if field.label == 'Fecha apertura' %}
-                    <div>
-                        {{ field }}
-                    </div>
-                {% else %}
-                    {{ field|addclass:'form-control' }}
-                {% endif %}
-            </div>
-        {% endfor %}
-        <button type="submit" class="btn btn-primary">Enviar</button>
+        {% include "formulario.html" %}
     </form>
 {% endblock %}
