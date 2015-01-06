@@ -1,4 +1,6 @@
 from django.db import models
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 from django.contrib.auth.models import User
 import datetime
 
@@ -7,8 +9,8 @@ ESTADOS = (
         ('AC', 'Aceptada'),
         ('AS', 'Asignada'),
         ('CP', 'Cerrada prematuramente'),
-        ('CE', 'Cerrada con solución'),
-        ('CF', 'Cerrada sin solución')
+        ('CTE', 'Cerrada con solución'),
+        ('CTF', 'Cerrada sin solución')
     )
 
 CATEGORIAS = (
@@ -32,7 +34,7 @@ class Incidencia(models.Model):
     descripcion = models.CharField(max_length=300)
     prioridad = models.IntegerField(null=True, blank=True)
     categoria = models.CharField(max_length=3, choices=CATEGORIAS)
-    estado = models.CharField(max_length=2, choices=ESTADOS, default='SO')
+    estado = models.CharField(max_length=3, choices=ESTADOS, default='SO')
     inventario = models.ForeignKey(ElementoInventario, null=True, blank=True)
 
     fecha_apertura = models.DateField(default=datetime.datetime.today)
@@ -47,13 +49,6 @@ class CambioEstado(models.Model):
     incidencia = models.ForeignKey(Incidencia)
     usuario = models.ForeignKey(User)
     fecha_cambio = models.DateField(default=datetime.datetime.today)
-    estado_inicial = models.CharField(max_length=2, choices=ESTADOS, default='SO')
-    estado_final = models.CharField(max_length=2, choices=ESTADOS, default='AC')
+    estado_inicial = models.CharField(max_length=3, choices=ESTADOS, default='SO')
+    estado_final = models.CharField(max_length=3, choices=ESTADOS, default='AC')
     nuevo = models.BooleanField(default=True)
-
-""" Crear el cambio estado cuando se cree una incidencia"""
-def receiver():
-    cambio_estado = CambioEstado(incidencia=self,
-                                 usuario=self.autor,
-                                 nuevo=True)
-    cambio_estado.save()

@@ -5,9 +5,30 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 
 from base.models import Incidencia, CambioEstado
-from base.forms import SupervisorIncidencia, NuevaIncidencia
+from base.forms import SupervisorIncidencia, NuevaIncidencia, CambioEstado
+
+
+def get_notificaciones(usuario):
+    grupos = usuario.groups.all()
+    supervisores = Group.objects.get(name='supervisores')
+    tecnicos = Group.objects.get(name='tecnicos')
+
+    if supervisores in grupos:
+        incidencias = Incidencia.objects.filter(supervisor=usuario)
+        notificaciones = CambioEstado.objects.filter(estado_final__startswith="CT")
+        notificaciones = notificaciones.filter(incidencia__in=incidencias).filter(nuevo=True)
+    elif tecnicos in grupos:
+        incidencias = Incidencia.objects.filter(tecnico_asignado=usuario)
+        notificaciones = CambioEstado.objects.filter(estado_final="CP")
+        notificaciones = notificaciones.filter(incidencia__in=incidencias).filter(nuevo=True)
+    else:
+        notificaciones = []
+    return notificaciones
 
 def error(request, tipo):
+    """
+        Muestra un mensaje de error en la pantalla
+    """
     context = {}
     if tipo == 'login-inactivo':
         context['mensaje'] = 'El usuario está deshabilitado.'
@@ -17,21 +38,32 @@ def error(request, tipo):
         context['mensaje'] = 'Ha habido un error en el login.'
     elif tipo == "incidencia-invalida":
         context['mensaje'] = 'La incidencia no existe.'
+    elif tipo == "sin-permisos":
+        context['mensaje'] = 'No tienes permisos.'
+    elif tipo == "cerrar-invalido":
+        context['mensaje'] = 'No puedes cerrar esta incidencia.'
     else:
         context['mensaje'] = 'Algo misterioso ha ocurrido.'
     return render(request, 'error.html', context)
 
 
 def home(request):
+    """
+        Home de la página web, depende de si el usuario está autenticado o no
+    """
     if request.user.is_authenticated():
         grupos = [g.name for g in request.user.groups.all()]
         context = {'grupos': grupos}
+        context['notificaciones_badge'] = len(get_notificaciones(request.user))
         return render(request, 'listado.html', context)
     else:
         return render(request, 'login.html', {})
 
 
 def login_procesar(request):
+    """
+        View para login llamado cuando se envía el formulario de login
+    """
     if 'usuario' in request.POST and 'password' in request.POST:
         username = request.POST['usuario']
         password = request.POST['password']
@@ -48,26 +80,44 @@ def login_procesar(request):
         return redirect('/error/login')
 
 def logout_procesar(request):
+    """
+        View para logout
+    """
     logout(request)
     return redirect('/')
 
 @login_required
 def perfil(request):
+    """
+        Página para el perfil
+    """
     grupos = [g.name for g in request.user.groups.all()]
     context = {'peticion': 'perfil', 'grupos': grupos}
+    context['notificaciones_badge'] = len(get_notificaciones(request.user))
 
     return render(request, 'perfil.html', context)
 
 @login_required
 def ayuda(request):
+    """
+        Página para la ayuda
+    """
     grupos = [g.name for g in request.user.groups.all()]
     context = {'peticion': 'ayuda', 'grupos': grupos}
+    context['notificaciones_badge'] = len(get_notificaciones(request.user))
 
     return render(request, 'ayuda.html', context)
 
 @login_required
 def incidencia(request, id_incidencia):
+    """
+        View para mostrar las incidencias con el formulario para el supervisor
+    """
     def cambiar_choices(form):
+        """
+            Función auxiliar para que los usuarios a los que se
+            les pueda asignar una incidencia sean solo los técnicos
+        """
         tecnicos = User.objects.filter(groups__name="tecnicos")
         choices = [('', '---------')]
         i = 1
@@ -76,32 +126,43 @@ def incidencia(request, id_incidencia):
             i += 1
         form.fields['tecnico_asignado'].choices = choices
 
-    grupos = [g.name for g in request.user.groups.all()]
-    context = {'grupos': grupos}
+    grupos = request.user.groups.all()
+    supervisores = Group.objects.get(name='supervisores')
+    context = {'grupos': [g.name for g in grupos]}
+    context['notificaciones_badge'] = len(get_notificaciones(request.user))
     try:
         incidencia = Incidencia.objects.get(id=id_incidencia)
         context['incidencia'] = incidencia
+        context['estado'] = incidencia.get_estado_display()
+        context['categoria'] = incidencia.get_categoria_display()
     except Incidencia.DoesNotExist:
         return redirect('/error/incidencia-invalida')
 
+    # Si el supervisor ha enviado el formulario para completar la incidencia
     if request.method == 'POST':
-        form = SupervisorIncidencia(request.POST, instance=incidencia)
-        cambiar_choices(form)
-        if form.is_valid():
-            incidencia = form.save()
-            incidencia.estado = 'AS'
-            incidencia.supervisor = request.user
-            incidencia.save()
-            cambio_estado = CambioEstado(incidencia=incidencia,
-                                         usuario=request.user,
-                                         estado_inicial='AC',
-                                         estado_final='AS',
-                                         nuevo=True)
-            cambio_estado.save()
-            return redirect('/')
-        else:
-            request.POST = None
-            context['form'] = form
+        # Un supervisor puede modificar cualquier incidencia la haya o no modificado antes
+        # él u otro compañero mientras que sea supervisor
+        if supervisores in grupos:
+            form = SupervisorIncidencia(request.POST, instance=incidencia)
+            cambiar_choices(form)
+            if form.is_valid():
+                incidencia = form.save()
+                incidencia.estado = 'AS'
+                incidencia.supervisor = request.user
+                incidencia.save()
+                cambio_estado = CambioEstado(incidencia=incidencia,
+                                             usuario=request.user,
+                                             estado_inicial='AC',
+                                             estado_final='AS',
+                                             nuevo=True)
+                cambio_estado.save()
+                return redirect('/')
+            # Si algún campo del formualrio del supervisor es inválido
+            else:
+                request.POST = None
+                context['form'] = form
+
+    # Mostrar la página de incidencia
     if 'form' not in context:
         form = SupervisorIncidencia(instance=incidencia)
         cambiar_choices(form)
@@ -111,40 +172,53 @@ def incidencia(request, id_incidencia):
 
 @login_required
 def cerrar(request):
-    grupos = [g.name for g in request.user.groups.all()]
-    context = {'grupos': grupos}
+    """
+        View para cerrar incidencias ya sean prematuras, exitosas o fracasadas.
+    """
+    grupos = request.user.groups.all()
+    context = {'grupos': [g.name for g in grupos]}
     clientes = Group.objects.get(name='clientes')
     tecnicos = Group.objects.get(name='tecnicos')
 
+    # Si la petición es correcta
     if 'tipo' in request.GET and 'incidencia' in request.GET:
         id_incidencia = request.GET['incidencia']
         try:
             incidencia = Incidencia.objects.get(id=id_incidencia)
+        # Si la incidencia es inválida
         except Incidencia.DoesNotExist:
-            return redirect('/')
-        if 'exito' == request.GET['tipo']:
-            incidencia.estado = 'CE'
-            cambio_estado = CambioEstado(incidencia=incidencia,
-                                         usuario=request.user,
-                                         estado_inicial='AS',
-                                         estado_final='CE',
-                                         nuevo=True)
-        elif 'fracaso' == request.GET['tipo']:
-            incidencia.estado = 'CF'
-            cambio_estado = CambioEstado(incidencia=incidencia,
-                                         usuario=request.user,
-                                         estado_inicial='AS',
-                                         estado_final='CF',
-                                         nuevo=True)
-        elif 'prematuro' == request.GET['tipo']:
-            incidencia.estado = 'CP'
-            cambio_estado = CambioEstado(incidencia=incidencia,
-                                         usuario=request.user,
-                                         estado_inicial='AS',
-                                         estado_final='CP',
-                                         nuevo=True)
+            return redirect('/error/incidencia-invalida')
+
+        print(grupos)
+        if tecnicos in grupos and incidencia.tecnico_asignado == request.user:
+            # Si el estado de la incidencia es consistente
+            if incidencia.estado == 'AS' or incidencia.estado == 'CP':
+                cambio_estado = CambioEstado(incidencia=incidencia,
+                                             usuario=request.user,
+                                             estado_inicial='AS',
+                                             nuevo=True)
+                if 'exito' == request.GET['tipo']:
+                    incidencia.estado = 'CTE'
+                    cambio_estado.estado_final = 'CTE'
+                elif 'fracaso' == request.GET['tipo']:
+                    incidencia.estado = 'CTF'
+                    cambio_estado.estado_final = 'CTF'
+                else:
+                    return redirect('/')
+            else:
+                return redirect('/error/cerrar-invalido')
+        elif clientes in grupos and incidencia.autor == request.user:
+            if 'prematuro' == request.GET['tipo'] and incidencia.estado == 'AS':
+                incidencia.estado = 'CP'
+                cambio_estado = CambioEstado(incidencia=incidencia,
+                                             usuario=request.user,
+                                             estado_inicial='AS',
+                                             estado_final='CP',
+                                             nuevo=True)
+            else:
+                return redirect('/error/cerrar-invalido')
         else:
-            return redirect('/')
+            return redirect('/error/sin-permisos')
         incidencia.save()
         cambio_estado.save()
     return redirect('/')
@@ -152,36 +226,53 @@ def cerrar(request):
 
 @login_required
 def nueva_incidencia(request):
-    grupos = [g.name for g in request.user.groups.all()]
-    context = {'peticion': 'nueva_incidencia', 'grupos': grupos}
+    """
+        Página para crear una nueva incidencia
+    """
+    grupos = request.user.groups.all()
+    context = {'peticion': 'nueva_incidencia', 'grupos': [g.name for g in grupos]}
+    context['notificaciones_badge'] = len(get_notificaciones(request.user))
     clientes = Group.objects.get(name='clientes')
 
-    if clientes in request.user.groups.all():
+    # Si el usuario es un cliente
+    if clientes in grupos:
+        # Si el cliente ha rellenado el formulario y lo ha enviado
         if request.method == 'POST':
             form = NuevaIncidencia(request.POST)
+            # Si todos los campos del formulario enviado son válidos
             if form.is_valid():
-                # TODO: implementar mensajes en listado.html
                 incidencia = form.save()
                 incidencia.autor = request.user
                 incidencia.save()
+                cambio_estado = CambioEstado(incidencia=incidencia,
+                                             usuario=incidencia.autor,
+                                             nuevo=True)
+                cambio_estado.save()
                 return redirect('/')
+            # Si algún campo del formulario es inválido
             else:
                 context['form'] = form
+        # Si el cliente quiere rellenar una nueva incidencia 
         else:
             form = NuevaIncidencia()
             context['form'] = form
         return render(request, 'abrir-incidencia.html', context)
+    # Si el usuario no es un cliente
     else:
         return redirect('/')
 
 
 @login_required
 def estadisticas(request):
-    grupos = [g.name for g in request.user.groups.all()]
-    context = {'peticion': 'estadisticas', 'grupos': grupos}
+    """
+        Página para mostrar las estadísticas
+    """
+    grupos = request.user.groups.all()
+    context = {'peticion': 'estadisticas', 'grupos': [g.name for g in grupos]}
+    context['notificaciones_badge'] = len(get_notificaciones(request.user))
     supervisores = Group.objects.get(name='supervisores')
 
-    if supervisores in request.user.groups.all():
+    if supervisores in grupos:
         return render(request, 'estadisticas.html', context)
     else:
         return redirect('/')
@@ -189,12 +280,27 @@ def estadisticas(request):
 
 @login_required
 def notificaciones(request):
-    grupos = [g.name for g in request.user.groups.all()]
-    context = {'peticion': 'notificaciones', 'grupos': grupos}
+    """
+        Página para mostrar las notificaciones
+    """
+    grupos = request.user.groups.all()
+    context = {'peticion': 'notificaciones', 'grupos': [g.name for g in grupos]}
+    context['notificaciones_badge'] = len(get_notificaciones(request.user))
     supervisores = Group.objects.get(name='supervisores')
     tecnicos = Group.objects.get(name='tecnicos')
 
-    if supervisores in request.user.groups.all() or tecnicos in request.user.groups.all():
+    if supervisores in grupos or tecnicos in grupos:
+        context["notificaciones"] = get_notificaciones(request.user)
         return render(request, 'notificaciones.html', context)
     else:
         return redirect('/')
+
+@login_required
+def ver_notificacion(request, id_notificacion):
+    """
+        View para ver una notificación
+    """
+    notificacion = CambioEstado.objects.get(id=id_notificacion)
+    notificacion.nuevo = False
+    notificacion.save()
+    return redirect("/incidencia/" + str(notificacion.incidencia.id))

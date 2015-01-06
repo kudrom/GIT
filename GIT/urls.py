@@ -17,6 +17,7 @@ urlpatterns = patterns('',
     url(r'^cerrar$', 'base.views.cerrar'),
 
     url(r'^notificaciones$', 'base.views.notificaciones'),
+    url(r'^notificaciones/([\d]+)$', 'base.views.ver_notificacion'),
 
     url(r'^estadisticas$', 'base.views.estadisticas'),
 

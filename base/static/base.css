@@ -1,5 +1,5 @@
 .table-hover > tbody > tr:hover{
-    background-color: #ED8544;
+    background-color: #999;
     cursor: pointer;
     color: white;
 }

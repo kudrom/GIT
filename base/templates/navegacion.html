@@ -12,7 +12,7 @@
         <ul class="nav navbar-nav">
             {% if "supervisores" in grupos or "tecnicos" in grupos %}
                 <li {% if peticion == "notificaciones" %} class="active" {% endif %}>
-                    <a href="/notificaciones"><span class="glyphicon glyphicon-bell" aria-hidden="true"></span> Notificaciones <span class="badge">14</span></a>
+                    <a href="/notificaciones"><span class="glyphicon glyphicon-bell" aria-hidden="true"></span> Notificaciones <span class="badge">{{ notificaciones_badge }}</span></a>
                 </li>
             {% endif %}
             {% if "supervisores" in grupos %}

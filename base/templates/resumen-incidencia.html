@@ -18,10 +18,13 @@
                 <h4>Autor: </h4><span>{{ incidencia.autor }}</span>
             </div>
             <div class="dato">
-                <h4>Estado: </h4><span>{{ incidencia.estado }}</span>
+                <h4>Supervisor: </h4><span>{{ incidencia.supervisor|default:"--" }}</span>
             </div>
             <div class="dato">
-                <h4>Categoria: </h4><span>{{ incidencia.categoria }}</span>
+                <h4>Estado: </h4><span>{{ estado }}</span>
+            </div>
+            <div class="dato">
+                <h4>Categoria: </h4><span>{{ categoria }}</span>
             </div>
             {% if "supervisores" not in grupos %}
                 <div class="dato">
@@ -68,15 +71,16 @@
 
     {% endif %}
     {% if "tecnicos" in grupos %}
-        <form>
-            <textarea class="form-control" rows="4"></textarea>
-            <button style="margin-top: 5px" type="submit" class="btn btn-primary">Enviar comentario</button>
-        </form>
-        <a class="btn btn-primary" href="/cerrar?tipo=exito&incidencia={{ incidencia.id }}" style="margin-top: 20px;">Cerrar con éxito</a>
-        <a class="btn btn-danger" href="/cerrar?tipo=fracaso&incidencia={{ incidencia.id }}" style="margin-top: 20px;">Cerrar con fracaso</a>
-
+        {% if incidencia.estado == "AS" or incidencia.estado == "CP" %}
+            <form>
+                <textarea class="form-control" rows="4"></textarea>
+                <button style="margin-top: 5px" type="submit" class="btn btn-primary">Enviar comentario</button>
+            </form>
+            <a class="btn btn-primary" href="/cerrar?tipo=exito&incidencia={{ incidencia.id }}" style="margin-top: 20px;">Cerrar con éxito</a>
+            <a class="btn btn-danger" href="/cerrar?tipo=fracaso&incidencia={{ incidencia.id }}" style="margin-top: 20px;">Cerrar con fracaso</a>
+        {% endif %}
     {% endif %}
-    {% if "clientes" in grupos %}
+    {% if "clientes" in grupos and incidencia.estado == "AS" %}
         <a class="btn btn-primary" href="/cerrar?tipo=prematuro&incidencia={{ incidencia.id }}" style="margin-top: 20px;">Cerrar</a>
     {% endif %}
 
