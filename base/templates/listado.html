@@ -3,9 +3,26 @@
 {% block navegacion %}
     {% include "navegacion.html" %}
 {% endblock %}
+{% block head %}
+    <style>
+        form select.form-control{
+            width: inherit;
+            display:inline;
+        }
+        form label{
+            width: 180px;
+        }
+    </style>
+{% endblock %}
 
 {% block contenido %}
     <h1>Listado de incidencias</h1>
+    {% if "supervisores" in grupos %}
+        <form method="get" action="/">
+            {% include "formulario.html" %}
+        </form>
+    {% endif %}
+
     <table class="table table-striped table-hover">
         <thead>
             <tr>

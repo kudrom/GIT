@@ -7,7 +7,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 
 from base.models import Incidencia, CambioEstado, Comentario
-from base.forms import SupervisorIncidencia, NuevaIncidencia, ComentarioForm
+from base.forms import SupervisorIncidencia, NuevaIncidencia, ComentarioForm, ListadoForm
 
 NUM_INCIDENCIAS_POR_PAGINA = 10
 
@@ -65,16 +65,23 @@ def home(request):
         context['notificaciones_badge'] = len(get_notificaciones(request.user))
 
         if clientes in grupos:
-            incidencias = Incidencia.objects.filter(autor=request.user)
+            incidencias = Incidencia.objects.filter(autor=request.user).filter(estado__in=['AS', 'AC'])
         elif tecnicos in grupos:
-            incidencias = Incidencia.objects.filter(tecnico_asignado=request.user)
+            incidencias = Incidencia.objects.filter(tecnico_asignado=request.user).filter(estado__in=['AS', 'AC'])
         elif supervisores in grupos:
+            # Formulario de filtrado para el supervisor
             incidencias = Incidencia.objects.all()
+            if "tecnico_asignado" in request.GET and request.GET['tecnico_asignado']:
+                incidencias = incidencias.filter(tecnico_asignado=request.GET['tecnico_asignado'])
+            if "autor" in request.GET and request.GET['autor']:
+                incidencias = incidencias.filter(autor=request.GET['autor'])
+            if "estado" in request.GET and request.GET['estado']:
+                incidencias = incidencias.filter(estado=request.GET['estado'])
+            else:
+                incidencias = incidencias.filter(estado__in=['AS', 'AC'])
+            context['form'] = ListadoForm(request.GET)
         else:
             return redirect('/error/sin-permisos')
-
-        # Escoger sólo las válidas
-        incidencias = incidencias.filter(estado__in=['AS', 'AC'])
 
         # Paginar
         pagina = int(request.GET['pagina']) if 'pagina' in request.GET else 1
