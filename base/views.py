@@ -141,7 +141,7 @@ def incidencia(request, id_incidencia):
                                              estado_final='AS',
                                              nuevo=True)
                 cambio_estado.save()
-                return redirect('/')
+                return redirect('/incidencia/' + str(id_incidencia))
             # Si algún campo del formulario del supervisor es inválido
             else:
                 request.POST = None
@@ -175,7 +175,6 @@ def cerrar(request):
         except Incidencia.DoesNotExist:
             return redirect('/error/incidencia-invalida')
 
-        print(grupos)
         if tecnicos in grupos and incidencia.tecnico_asignado == request.user:
             # Si el estado de la incidencia es consistente
             if incidencia.estado == 'AS' or incidencia.estado == 'CP':
@@ -190,11 +189,11 @@ def cerrar(request):
                     incidencia.estado = 'CTF'
                     cambio_estado.estado_final = 'CTF'
                 else:
-                    return redirect('/')
+                    return redirect('/incidencia/' + str(incidencia.id))
             else:
                 return redirect('/error/cerrar-invalido')
         elif clientes in grupos and incidencia.autor == request.user:
-            if 'prematuro' == request.GET['tipo'] and incidencia.estado == 'AS':
+            if 'prematuro' == request.GET['tipo'] and incidencia.estado in ['AS', 'AC']:
                 incidencia.estado = 'CP'
                 cambio_estado = CambioEstado(incidencia=incidencia,
                                              usuario=request.user,
@@ -207,7 +206,9 @@ def cerrar(request):
             return redirect('/error/sin-permisos')
         incidencia.save()
         cambio_estado.save()
-    return redirect('/')
+    else:
+        return redirect('/')
+    return redirect('/incidencia/' + str(id_incidencia))
 
 
 @login_required
@@ -227,9 +228,7 @@ def comentario(request, incidencia_id):
             comentario.usuario = request.user
             comentario.incidencia = Incidencia.objects.get(id=incidencia_id)
             comentario.save()
-            return redirect('/incidencia/' + str(incidencia_id))
-        else:
-            return redirect('/')
+        return redirect('/incidencia/' + str(incidencia_id))
     else:
         return redirect('/error/sin-permisos')
 

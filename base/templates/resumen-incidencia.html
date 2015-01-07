@@ -84,8 +84,10 @@
             <a class="btn btn-danger" href="/cerrar?tipo=fracaso&incidencia={{ incidencia.id }}" style="margin-top: 20px;">Cerrar con fracaso</a>
         {% endif %}
     {% endif %}
-    {% if "clientes" in grupos and incidencia.estado == "AS" %}
-        <a class="btn btn-primary" href="/cerrar?tipo=prematuro&incidencia={{ incidencia.id }}" style="margin-top: 20px;">Cerrar</a>
+    {% if "clientes" in grupos %}
+        {% if incidencia.estado == "AS" or incidencia.estado == "AC" %}
+            <a class="btn btn-primary" href="/cerrar?tipo=prematuro&incidencia={{ incidencia.id }}" style="margin-top: 20px;">Cerrar</a>
+        {% endif %}
     {% endif %}
 
 {% endblock %}
