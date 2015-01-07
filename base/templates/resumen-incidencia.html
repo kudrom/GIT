@@ -26,7 +26,7 @@
             <div class="dato">
                 <h4>Categoria: </h4><span>{{ categoria }}</span>
             </div>
-            {% if "supervisores" not in grupos %}
+            {% if "supervisores" not in grupos or incidencia.estado != 'AC' %}
                 <div class="dato">
                     <h4>Técnico Asignado: </h4><span>{{ incidencia.tecnico_asignado|default:"--" }}</span>
                 </div>
@@ -64,7 +64,7 @@
             </div>
         </div>
     </div>
-    {% if "supervisores" in grupos %}
+    {% if "supervisores" in grupos and incidencia.estado == 'AC' %}
         <form method="post" action="/incidencia/{{ incidencia.id }}">
             {% include "formulario.html" %}
         </form>

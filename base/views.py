@@ -113,19 +113,6 @@ def incidencia(request, id_incidencia):
     """
         View para mostrar las incidencias con el formulario para el supervisor
     """
-    def cambiar_choices(form):
-        """
-            Función auxiliar para que los usuarios a los que se
-            les pueda asignar una incidencia sean solo los técnicos
-        """
-        tecnicos = User.objects.filter(groups__name="tecnicos")
-        choices = [('', '---------')]
-        i = 1
-        for tecnico in tecnicos:
-            choices.append((i, tecnico))
-            i += 1
-        form.fields['tecnico_asignado'].choices = choices
-
     grupos = request.user.groups.all()
     supervisores = Group.objects.get(name='supervisores')
     context = {'grupos': [g.name for g in grupos]}
@@ -140,11 +127,10 @@ def incidencia(request, id_incidencia):
 
     # Si el supervisor ha enviado el formulario para completar la incidencia
     if request.method == 'POST':
-        # Un supervisor puede modificar cualquier incidencia la haya o no modificado antes
-        # él u otro compañero mientras que sea supervisor
-        if supervisores in grupos:
+        # Un supervisor solo puede modificar incidencias que estén en estado AC
+        if supervisores in grupos and incidencia.estado == 'AC':
             form = SupervisorIncidencia(request.POST, instance=incidencia)
-            cambiar_choices(form)
+            form.fields['tecnico_asignado'].queryset = User.objects.filter(groups__name="tecnicos")
             if form.is_valid():
                 incidencia = form.save()
                 incidencia.estado = 'AS'
@@ -157,15 +143,15 @@ def incidencia(request, id_incidencia):
                                              nuevo=True)
                 cambio_estado.save()
                 return redirect('/')
-            # Si algún campo del formualrio del supervisor es inválido
+            # Si algún campo del formulario del supervisor es inválido
             else:
                 request.POST = None
                 context['form'] = form
 
     # Mostrar la página de incidencia
-    if 'form' not in context:
+    if 'form' not in context and incidencia.estado == 'AC':
         form = SupervisorIncidencia(instance=incidencia)
-        cambiar_choices(form)
+        form.fields['tecnico_asignado'].queryset = User.objects.filter(groups__name="tecnicos")
         context['form'] = form
     return render(request, 'resumen-incidencia.html', context)
 
@@ -195,7 +181,7 @@ def cerrar(request):
             if incidencia.estado == 'AS' or incidencia.estado == 'CP':
                 cambio_estado = CambioEstado(incidencia=incidencia,
                                              usuario=request.user,
-                                             estado_inicial='AS',
+                                             estado_inicial=incidencia.estado,
                                              nuevo=True)
                 if 'exito' == request.GET['tipo']:
                     incidencia.estado = 'CTE'
@@ -243,12 +229,14 @@ def nueva_incidencia(request):
             if form.is_valid():
                 incidencia = form.save()
                 incidencia.autor = request.user
+                # Si la incidencia se ha podido guardar es inmediatamente aceptada
+                incidencia.estado = 'AC'
                 incidencia.save()
                 cambio_estado = CambioEstado(incidencia=incidencia,
                                              usuario=incidencia.autor,
                                              nuevo=True)
                 cambio_estado.save()
-                return redirect('/')
+                return redirect('/incidencia/' + str(incidencia.id))
             # Si algún campo del formulario es inválido
             else:
                 context['form'] = form
