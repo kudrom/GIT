@@ -1,7 +1,7 @@
 from django.contrib.auth.models import User
 from django import forms
 from django.forms import extras
-from base.models import Incidencia, ElementoInventario, CambioEstado
+from base.models import Incidencia, ElementoInventario, CambioEstado, Comentario
 
 
 class NuevaIncidencia(forms.ModelForm):
@@ -18,3 +18,8 @@ class SupervisorIncidencia(forms.ModelForm):
     class Meta:
         model = Incidencia
         fields = ['prioridad', 'inventario', 'tecnico_asignado']
+
+class ComentarioForm(forms.ModelForm):
+    class Meta:
+        model = Comentario
+        fields = ['comentario']

@@ -2,6 +2,7 @@ from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.contrib.auth.models import User
+from django.utils import timezone
 import datetime
 
 ESTADOS = (
@@ -54,6 +55,7 @@ class CambioEstado(models.Model):
     nuevo = models.BooleanField(default=True)
 
 class Comentario(models.Model):
-    incidencia = models.ForeignKey(Incidencia)
     comentario = models.TextField()
-    fecha = models.DateTimeField(default=datetime.datetime.today)
+    fecha = models.DateTimeField(default=timezone.now)
+    incidencia = models.ForeignKey(Incidencia, null=True, blank=True)
+    usuario = models.ForeignKey(User, null=True, blank=True)

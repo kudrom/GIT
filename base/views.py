@@ -4,8 +4,8 @@ from django.contrib.auth.models import Group, User
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 
-from base.models import Incidencia, CambioEstado
-from base.forms import SupervisorIncidencia, NuevaIncidencia, CambioEstado
+from base.models import Incidencia, CambioEstado, Comentario
+from base.forms import SupervisorIncidencia, NuevaIncidencia, ComentarioForm
 
 
 def get_notificaciones(usuario):
@@ -120,8 +120,7 @@ def incidencia(request, id_incidencia):
     try:
         incidencia = Incidencia.objects.get(id=id_incidencia)
         context['incidencia'] = incidencia
-        context['estado'] = incidencia.get_estado_display()
-        context['categoria'] = incidencia.get_categoria_display()
+        context['comentarios'] = Comentario.objects.filter(incidencia=incidencia)
     except Incidencia.DoesNotExist:
         return redirect('/error/incidencia-invalida')
 
@@ -148,6 +147,7 @@ def incidencia(request, id_incidencia):
                 request.POST = None
                 context['form'] = form
 
+    context['form_comentario'] = ComentarioForm()
     # Mostrar la página de incidencia
     if 'form' not in context and incidencia.estado == 'AC':
         form = SupervisorIncidencia(instance=incidencia)
@@ -209,6 +209,29 @@ def cerrar(request):
         cambio_estado.save()
     return redirect('/')
 
+
+@login_required
+def comentario(request, incidencia_id):
+    """
+        Crea un comentario en la base de datos
+    """
+    grupos = request.user.groups.all()
+    context = {'grupos': [g.name for g in grupos]}
+    context['notificaciones_badge'] = len(get_notificaciones(request.user))
+    tecnicos = Group.objects.get(name='tecnicos')
+
+    if tecnicos in grupos:
+        if request.method == 'POST':
+            form = ComentarioForm(request.POST)
+            comentario = form.save()
+            comentario.usuario = request.user
+            comentario.incidencia = Incidencia.objects.get(id=incidencia_id)
+            comentario.save()
+            return redirect('/incidencia/' + str(incidencia_id))
+        else:
+            return redirect('/')
+    else:
+        return redirect('/error/sin-permisos')
 
 @login_required
 def nueva_incidencia(request):

@@ -4,6 +4,15 @@
     {% include "navegacion.html" %}
 {% endblock %}
 
+{% block head %}
+    <style>
+        .comentario-form textarea{
+            display: block;
+            width: 100%;
+        }
+    </style>
+{% endblock %}
+
 {% block contenido %}
     <div class="resumen-incidencia">
         <h1>{{ incidencia.nombre }}</h1>
@@ -21,10 +30,10 @@
                 <h4>Supervisor: </h4><span>{{ incidencia.supervisor|default:"--" }}</span>
             </div>
             <div class="dato">
-                <h4>Estado: </h4><span>{{ estado }}</span>
+                <h4>Estado: </h4><span>{{ incidencia.get_estado_display }}</span>
             </div>
             <div class="dato">
-                <h4>Categoria: </h4><span>{{ categoria }}</span>
+                <h4>Categoria: </h4><span>{{ incidencia.get_categoria_display }}</span>
             </div>
             {% if "supervisores" not in grupos or incidencia.estado != 'AC' %}
                 <div class="dato">
@@ -51,10 +60,9 @@
     <div class="comentarios">
         {% for comentario in comentarios %}
         <div class="panel panel-info">
-            <div class="panel-heading">Por Circos el 21/12/2014</div>
+            <div class="panel-heading">Por {{ comentario.usuario }} el {{ comentario.fecha }}</div>
             <div class="panel-body">
-                <p>Lorem Ipsum is simply dummy text of the printing and typesetting industry.</p>
-                <p>Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book.</p>
+                {{ comentario.comentario }}
             </div>
         </div>
         {% endfor %}
@@ -66,11 +74,12 @@
 
     {% endif %}
     {% if "tecnicos" in grupos %}
+        <form method="post" action="/comentario/{{ incidencia.id }}" class="comentario-form">
+            {% csrf_token %}
+            {{ form_comentario }}
+            <button style="margin-top: 5px" type="submit" class="btn btn-primary">Enviar comentario</button>
+        </form>
         {% if incidencia.estado == "AS" or incidencia.estado == "CP" %}
-            <form>
-                <textarea class="form-control" rows="4"></textarea>
-                <button style="margin-top: 5px" type="submit" class="btn btn-primary">Enviar comentario</button>
-            </form>
             <a class="btn btn-primary" href="/cerrar?tipo=exito&incidencia={{ incidencia.id }}" style="margin-top: 20px;">Cerrar con éxito</a>
             <a class="btn btn-danger" href="/cerrar?tipo=fracaso&incidencia={{ incidencia.id }}" style="margin-top: 20px;">Cerrar con fracaso</a>
         {% endif %}
