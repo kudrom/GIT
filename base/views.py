@@ -1,3 +1,5 @@
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+
 from django.shortcuts import render, redirect
 
 from django.contrib.auth.models import Group, User
@@ -6,6 +8,8 @@ from django.contrib.auth.decorators import login_required
 
 from base.models import Incidencia, CambioEstado, Comentario
 from base.forms import SupervisorIncidencia, NuevaIncidencia, ComentarioForm
+
+NUM_INCIDENCIAS_POR_PAGINA = 10
 
 
 def get_notificaciones(usuario):
@@ -52,11 +56,43 @@ def home(request):
         Home de la página web, depende de si el usuario está autenticado o no
     """
     if request.user.is_authenticated():
-        grupos = [g.name for g in request.user.groups.all()]
-        context = {'grupos': grupos}
+        # Imprimir el listado de las incidencias
+        grupos = request.user.groups.all()
+        clientes = Group.objects.get(name='clientes')
+        tecnicos = Group.objects.get(name='tecnicos')
+        supervisores = Group.objects.get(name='supervisores')
+        context = {'grupos': [g.name for g in grupos]}
         context['notificaciones_badge'] = len(get_notificaciones(request.user))
+
+        if clientes in grupos:
+            incidencias = Incidencia.objects.filter(autor=request.user)
+        elif tecnicos in grupos:
+            incidencias = Incidencia.objects.filter(tecnico_asignado=request.user)
+        elif supervisores in grupos:
+            incidencias = Incidencia.objects.all()
+        else:
+            return redirect('/error/sin-permisos')
+
+        # Escoger sólo las válidas
+        incidencias = incidencias.filter(estado__in=['AS', 'AC'])
+
+        # Paginar
+        pagina = int(request.GET['pagina']) if 'pagina' in request.GET else 1
+        paginator = Paginator(incidencias, NUM_INCIDENCIAS_POR_PAGINA)
+        try:
+            incidencias = paginator.page(pagina)
+        except PageNotAnInteger:
+            incidencias = paginator.page(1)
+            pagina = 1
+        except EmptyPage:
+            incidencias = paginator.page(paginator.num_pages)
+            pagina = paginator.num_pages
+        context['paginas'] = range(1, paginator.num_pages + 1)
+        context['pagina_actual'] = pagina
+        context['incidencias'] = incidencias
         return render(request, 'listado.html', context)
     else:
+        # Imprimir el login
         return render(request, 'login.html', {})
 
 

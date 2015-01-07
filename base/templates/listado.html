@@ -9,75 +9,39 @@
     <table class="table table-striped table-hover">
         <thead>
             <tr>
-                <th>#</th>
+                <th>ID</th>
                 <th>Nombre</th>
                 <th>Fecha Apertura</th>
-                <th>Tags</th>
+                <th>Estado</th>
             </tr>
         </thead>
         <tbody>
-            <tr>
-                <td>1</td>
-                <td>Incidencia corta</td>
-                <td>12/12/2014</td>
-                <td>etiqueta1, etqieta2, nose</td>
-            </tr>
-            <tr>
-                <td>2</td>
-                <td>Incidencia muy larga para aburrir</td>
-                <td>12/12/2014</td>
-                <td>etiqueta1</td>
-            </tr>
-            <tr>
-                <td>3</td>
-                <td>Incidencia corta</td>
-                <td>12/12/2014</td>
-                <td>etqieta2, nose, miel, cabra, movil</td>
-            </tr>
-            <tr>
-                <td>4</td>
-                <td>Incidencia muy corta</td>
-                <td>12/12/2014</td>
-                <td>etiqueta1, nose</td>
-            </tr>
-            <tr>
-                <td>5</td>
-                <td>Incidencia pu</td>
-                <td>12/12/2014</td>
-                <td>nose</td>
-            </tr>
-            <tr>
-                <td>6</td>
-                <td>Incidencia corta</td>
-                <td>12/12/2014</td>
-                <td>etiqueta1, etqieta2, nose</td>
-            </tr>
-            <tr>
-                <td>7</td>
-                <td>Incidencia corta</td>
-                <td>12/12/2014</td>
-                <td>etiqueta1, etqieta2, nose</td>
-            </tr>
+            {% for incidencia in incidencias %}
+                <tr id="incidencia-{{ incidencia.id }}">
+                    <td>{{ incidencia.id }}</td>
+                    <td>{{ incidencia.nombre }}</td>
+                    <td>{{ incidencia.fecha_apertura }}</td>
+                    <td>{{ incidencia.get_estado_display }}</td>
+                </tr>
+            {% endfor %}
         </tbody>
     </table>
 
     <nav class="text-center">
-      <ul class="pagination">
-        <li>
-          <a href="#" aria-label="Previous">
-            <span aria-hidden="true">&laquo;</span>
-          </a>
-        </li>
-        <li><a href="#">1</a></li>
-        <li><a href="#">2</a></li>
-        <li><a href="#">3</a></li>
-        <li><a href="#">4</a></li>
-        <li><a href="#">5</a></li>
-        <li>
-          <a href="#" aria-label="Next">
-            <span aria-hidden="true">&raquo;</span>
-          </a>
-        </li>
-      </ul>
+        <ul class="pagination">
+            {% for pagina in paginas %}
+                <li {% if pagina == pagina_actual %}class="active"{% endif %}>
+                    <a href="/?pagina={{ pagina }}">{{ pagina }}</a>
+                </li>
+            {% endfor %}
+        </ul>
     </nav>
+{% endblock %}
+{% block scripts %}
+    <script>
+        $("tr").click(function(e){
+            var notificacion = $(e.target).parent().attr('id').substr(11);
+            window.location.replace("/incidencia/" + notificacion);
+        });
+    </script>
 {% endblock %}
