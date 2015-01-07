@@ -49,6 +49,7 @@
 
     <div class="clearfix"></div>
     <div class="comentarios">
+        {% for comentario in comentarios %}
         <div class="panel panel-info">
             <div class="panel-heading">Por Circos el 21/12/2014</div>
             <div class="panel-body">
@@ -56,13 +57,7 @@
                 <p>Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book.</p>
             </div>
         </div>
-        <div class="panel panel-info">
-            <div class="panel-heading">Por Juanma el 22/12/2014</div>
-            <div class="panel-body">
-                <p>Lorem Ipsum is simply dummy text of the printing and typesetting industry.</p>
-                <p>Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book.</p>
-            </div>
-        </div>
+        {% endfor %}
     </div>
     {% if "supervisores" in grupos and incidencia.estado == 'AC' %}
         <form method="post" action="/incidencia/{{ incidencia.id }}">

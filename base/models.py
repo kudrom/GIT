@@ -31,13 +31,13 @@ class ElementoInventario(models.Model):
 
 class Incidencia(models.Model):
     nombre = models.CharField(max_length=100)
-    descripcion = models.CharField(max_length=300)
+    descripcion = models.TextField()
     prioridad = models.IntegerField(null=True, blank=True)
     categoria = models.CharField(max_length=3, choices=CATEGORIAS)
     estado = models.CharField(max_length=3, choices=ESTADOS, default='SO')
     inventario = models.ForeignKey(ElementoInventario, null=True, blank=True)
 
-    fecha_apertura = models.DateField(default=datetime.datetime.today)
+    fecha_apertura = models.DateField(default=datetime.date.today)
     fecha_cierre = models.DateField(null=True, blank=True)
     resuelta_exito = models.BooleanField(default=False)
 
@@ -52,3 +52,8 @@ class CambioEstado(models.Model):
     estado_inicial = models.CharField(max_length=3, choices=ESTADOS, default='SO')
     estado_final = models.CharField(max_length=3, choices=ESTADOS, default='AC')
     nuevo = models.BooleanField(default=True)
+
+class Comentario(models.Model):
+    incidencia = models.ForeignKey(Incidencia)
+    comentario = models.TextField()
+    fecha = models.DateTimeField(default=datetime.datetime.today)
