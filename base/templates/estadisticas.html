@@ -13,24 +13,49 @@
         }
 
         .x.axis path {
-          display: none;
         }
 
-        .line {
+        .cerradas {
           fill: none;
           stroke: steelblue;
+          stroke-width: 1.5px;
+        }
+
+        .nuevas{
+          fill: none;
+          stroke: green;
           stroke-width: 1.5px;
         }
 
         .area{
             fill: steelblue;
         }
+
+        .legend {
+            font-size: 12px;
+        }
+
+        rect {
+            stroke-width: 2;
+        }
     </style>
 {% endblock %}
 
 {% block contenido %}
-    <div id="incidencias"></div>
-    <div id="ac-as"></div>
+    <h1>Estadísticas</h1>
+    <div>
+        <h2>Resumen de incidencias</h2>
+        <div id="incidencias"></div>
+    </div>
+    <div>
+        <h2>Duración de los estados por incidencia</h2>
+        <div id="ac-as"></div>
+        <div id="as-cp"></div>
+        <div id="as-cte"></div>
+        <div id="as-ctf"></div>
+        <div id="cp-cte"></div>
+        <div id="cp-ctf"></div>
+    </div>
 {% endblock %}
 
 {% block scripts %}
@@ -91,7 +116,7 @@
         }
 
         // Dibuja el gráfico para la descripción de incidencias
-        dibujar("#incidencias", "/static/incidencias.csv", "# incidencias", function (svg, data, x, y){
+        dibujar("#incidencias", "/static/incidencias.csv", "# incidencias", function (svg, data, x, y) {
             // Procesamos los datos
             data.forEach(function(d) {
                 d.fecha = parseDate(d.fecha);
@@ -100,25 +125,52 @@
             });
 
             // Establecemos el dominio de los dos ejes
-            y.domain([0, d3.max(data, function(d) { return d.totales > d.nuevas ? d.totales : d.nuevas; })]);
+            y.domain([0, d3.max(data, function(d) { return d.cerradas > d.nuevas ? d.cerradas : d.nuevas; })]);
             x.domain(d3.extent(data, function(d) { return d.fecha; }));
 
-            // Creamos la representación
-            var linea = d3.svg.line()
+            // Creamos las representaciones
+            var linea_nuevas = d3.svg.line()
                 .x(function(d) { return x(d.fecha); })
-                .y(function(d) { return y(d.dato); });
+                .y(function(d) { return y(d.nuevas); });
+            var linea_cerradas = d3.svg.line()
+                .x(function(d) { return x(d.fecha); })
+                .y(function(d) { return y(d.cerradas); });
 
             // Dibujamos
             svg.append("path")
                 .datum(data)
-                .attr("class", "line")
-                .attr("d", linea);
+                .attr("class", "nuevas")
+                .attr("d", linea_nuevas);
+            svg.append("path")
+                .datum(data)
+                .attr("class", "cerradas")
+                .attr("d", linea_cerradas);
+
+            // Imprimimos la leyenda
+            var legend = svg.selectAll('.legend')
+              .data(['nuevas', 'cerradas'])
+              .enter()
+                  .append('g')
+                  .attr('class', 'legend')
+                  .attr('transform', function(d, i) {
+                    return 'translate(0, ' + i * 20 + ')';
+                  });
+            legend.append('rect')
+              .attr('width', 18)
+              .attr('height', 18)
+              .attr('x', width - 18)
+              .style('fill', function(d, i) { return d == 'nuevas' ? 'green' : 'steelblue'; });
+            legend.append('text')
+              .attr('x', width - 24)
+              .attr('y', 9)
+              .attr('dy', ".35em")
+              .style("text-anchor", "end")
+              .text(function(d) { return d; });
         });
 
         // Dibuja los gráficos para todos los cambios de estado
         ["ac-as", "as-cp", "as-cte", "as-ctf", "cp-cte", "cp-ctf"].forEach(function (cambio_estado){
             console.log(cambio_estado);
-            /*
             // Dibuja los gráficos para un cambio de estado concreto
             dibujar("#" + cambio_estado, "/static/" + cambio_estado + ".csv",
                     "% acumulado", function (svg, data, x, y){
@@ -144,7 +196,6 @@
                     .attr("class", "area")
                     .attr("d", area);
             });
-            */
         });
     </script>
 {% endblock %}
