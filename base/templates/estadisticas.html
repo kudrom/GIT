@@ -27,6 +27,18 @@
           stroke-width: 1.5px;
         }
 
+        .asignada{
+            fill: steelblue;
+        }
+
+        .cerrada-fracaso{
+            fill: red;
+        }
+
+        .cerrada-exito{
+            fill:green;
+        }
+
         .area{
             fill: steelblue;
         }
@@ -74,8 +86,12 @@
               */
 
             // Declaramos los ejes y el elemento svg padre
-            var x = d3.time.scale()
-                .range([0, width]);
+            if(elemento_html === "#incidencias"){
+                var x = d3.time.scale();
+            }else{
+                var x = d3.scale.linear();
+            }
+            x.range([0, width]);
 
             var y = d3.scale.linear()
                 .range([height, 0]);
@@ -96,7 +112,7 @@
 
             d3.csv(path_data, function(error, data) {
               // Dibujamos el gráfico
-              primitiva_dibujar(svg, data, x, y);
+              primitiva_dibujar(svg, data, x, y, xAxis, yAxis);
 
               // Dibujamos sus ejes
               svg.append("g")
@@ -169,20 +185,23 @@
         });
 
         // Dibuja los gráficos para todos los cambios de estado
-        ["ac-as", "as-cp", "as-cte", "as-ctf", "cp-cte", "cp-ctf"].forEach(function (cambio_estado){
+        ["asignada", "cerrada-exito", "cerrada-fracaso"].forEach(function (cambio_estado){
             console.log(cambio_estado);
             // Dibuja los gráficos para un cambio de estado concreto
             dibujar("#" + cambio_estado, "/static/" + cambio_estado + ".csv",
-                    "% acumulado", function (svg, data, x, y){
+                    "% acumulado", function (svg, data, x, y, xAxis, yAxis){
                 // Procesamos los datos
                 data.forEach(function(d) {
-                    d.fecha = parseDate(d.fecha);
-                    d.dato = +d.dato;
+                    d.duracion = parseDate(d.duracion);
+                    d.dato = d.dato / 100;
                 });
 
                 // Establecemos el dominio de los dos ejes
                 y.domain([0, d3.max(data, function(d) { return d.dato; })]);
-                x.domain(d3.extent(data, function(d) { return d.fecha; }));
+                x.domain(d3.extent(data, function(d) { return d.duracion; }));
+
+                // Cambiamos el formato de los ejes
+                yAxis.tickFormat(d3.format(".0%"))
 
                 // Creamos la representación
                 var area = d3.svg.area()
@@ -193,7 +212,7 @@
                 // Dibujamos
                 svg.append("path")
                     .datum(data)
-                    .attr("class", "area")
+                    .attr("class", cambio_estado)
                     .attr("d", area);
             });
         });
