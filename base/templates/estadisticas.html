@@ -5,38 +5,32 @@
 {% endblock %}
 {% block head %}
     <style>
-        .axis path,
-        .axis line {
-          fill: none;
-          stroke: #000;
-          shape-rendering: crispEdges;
-        }
-
-        .x.axis path {
+        .axis path, .axis line {
+            fill: none;
+            stroke: #000;
+            shape-rendering: crispEdges;
         }
 
         .cerradas {
-          fill: none;
-          stroke: steelblue;
-          stroke-width: 1.5px;
+            stroke: steelblue;
+            stroke-width: 1.5;
         }
 
         .nuevas{
-          fill: none;
-          stroke: green;
-          stroke-width: 1.5px;
+            stroke: green;
+            stroke-width: 1.5;
         }
 
         .asignada{
             fill: steelblue;
         }
 
-        .cerrada-fracaso{
-            fill: red;
-        }
-
         .cerrada-exito{
             fill:green;
+        }
+
+        .cerrada-fracaso{
+            fill: red;
         }
 
         .area{
@@ -45,10 +39,6 @@
 
         .legend {
             font-size: 12px;
-        }
-
-        rect {
-            stroke-width: 2;
         }
     </style>
 {% endblock %}
@@ -60,10 +50,19 @@
         <div id="incidencias"></div>
     </div>
     <div>
-        <h2>Duración de los estados por incidencia</h2>
-        <div id="asignada"></div>
-        <div id="cerrada-exito"></div>
-        <div id="cerrada-fracaso"></div>
+        <h2>Duración para tramitar incidencias</h2>
+        <div>
+            <h3>Cantidad de días necesarios para asignar una incidencia</h3>
+            <div id="asignada"></div>
+        </div>
+        <div>
+            <h3>Cantidad de días necesarios para cerrar con éxito una incidencia</h3>
+            <div id="cerrada-exito"></div>
+        </div>
+        <div>
+            <h3>Cantidad de días necesarios para cerrar con fracaso una incidencia</h3>
+            <div id="cerrada-fracaso"></div>
+        </div>
     </div>
 {% endblock %}
 
@@ -116,6 +115,7 @@
                   .attr("class", "x axis")
                   .attr("transform", "translate(0," + height + ")")
                   .call(xAxis);
+
               svg.append("g")
                   .attr("class", "y axis")
                   .call(yAxis)
@@ -186,7 +186,7 @@
             console.log(cambio_estado);
             // Dibuja los gráficos para un cambio de estado concreto
             dibujar("#" + cambio_estado, "/static/" + cambio_estado + ".csv",
-                    "% acumulado", function (svg, data, x, y, xAxis, yAxis){
+                    "% acumulado de incidencias", function (svg, data, x, y, xAxis, yAxis){
                 // Procesamos los datos
                 data.forEach(function(d) {
                     d.duracion = parseInt(d.duracion);
@@ -199,7 +199,7 @@
 
                 // Cambiamos el formato de los ejes
                 yAxis.tickFormat(d3.format(".0%"));
-                xAxis.tickFormat(d3.format(""));
+                xAxis.tickFormat(d3.format(".0d"));
 
                 // Creamos la representación
                 var area = d3.svg.area()
@@ -207,11 +207,19 @@
                     .y1(function(d) { return y(d.dato); })
                     .y0(height);
 
-                // Dibujamos
+                // Dibujamos el diagrama
                 svg.append("path")
                     .datum(data)
                     .attr("class", cambio_estado)
                     .attr("d", area);
+
+                // Dibujamos leyenda para el eje de abscisas
+                svg.append("text")
+                  .attr("y", height - 20)
+                  .attr("x", width - 10)
+                  .attr("dy", ".71em")
+                  .style("text-anchor", "end")
+                  .text("Duración (días)");
             });
         });
     </script>

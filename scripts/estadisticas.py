@@ -5,7 +5,10 @@
 import csv
 import datetime
 import os.path
+import collections
+
 from django.db.models import Count
+
 from base.models import Incidencia, CambioEstado
 
 DIR = '/home/kudrom/datos/clase/pgpi/GIT'
@@ -66,7 +69,8 @@ def run():
             if diferencia_tiempo.days not in index:
                 index[diferencia_tiempo.days] = 0
             index[diferencia_tiempo.days] += 1
-        return index, total
+        index_ordenado = collections.OrderedDict(sorted(index.items()))
+        return index_ordenado, total
 
     def escribir_datos(index, csvfile, total):
         """
@@ -74,8 +78,10 @@ def run():
         """
         writer = csv.writer(csvfile)
         writer.writerow(['duracion', 'dato'])
+        acumulado = 0
         for duracion in index:
-            writer.writerow([duracion, index[duracion]/total * 100])
+            acumulado += index[duracion]
+            writer.writerow([duracion, acumulado/total * 100])
 
     # Datos para las duraciones de incidencias asignadas
     index, total = indexar('AC', 'AS')
