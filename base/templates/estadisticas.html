@@ -61,12 +61,9 @@
     </div>
     <div>
         <h2>Duración de los estados por incidencia</h2>
-        <div id="ac-as"></div>
-        <div id="as-cp"></div>
-        <div id="as-cte"></div>
-        <div id="as-ctf"></div>
-        <div id="cp-cte"></div>
-        <div id="cp-ctf"></div>
+        <div id="asignada"></div>
+        <div id="cerrada-exito"></div>
+        <div id="cerrada-fracaso"></div>
     </div>
 {% endblock %}
 
@@ -192,7 +189,7 @@
                     "% acumulado", function (svg, data, x, y, xAxis, yAxis){
                 // Procesamos los datos
                 data.forEach(function(d) {
-                    d.duracion = parseDate(d.duracion);
+                    d.duracion = parseInt(d.duracion);
                     d.dato = d.dato / 100;
                 });
 
@@ -201,11 +198,12 @@
                 x.domain(d3.extent(data, function(d) { return d.duracion; }));
 
                 // Cambiamos el formato de los ejes
-                yAxis.tickFormat(d3.format(".0%"))
+                yAxis.tickFormat(d3.format(".0%"));
+                xAxis.tickFormat(d3.format(""));
 
                 // Creamos la representación
                 var area = d3.svg.area()
-                    .x(function(d) { return x(d.fecha); })
+                    .x(function(d) { return x(d.duracion); })
                     .y1(function(d) { return y(d.dato); })
                     .y0(height);
 

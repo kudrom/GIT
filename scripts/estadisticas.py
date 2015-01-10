@@ -73,7 +73,7 @@ def run():
             Función auxiliar para reducir la repetición de código
         """
         writer = csv.writer(csvfile)
-        writer.writerow(['fecha', 'dato'])
+        writer.writerow(['duracion', 'dato'])
         for duracion in index:
             writer.writerow([duracion, index[duracion]/total * 100])
 
