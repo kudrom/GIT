@@ -3,7 +3,148 @@
 {% block navegacion %}
     {% include "navegacion.html" %}
 {% endblock %}
+{% block head %}
+    <style>
+        .axis path,
+        .axis line {
+          fill: none;
+          stroke: #000;
+          shape-rendering: crispEdges;
+        }
+
+        .x.axis path {
+          display: none;
+        }
+
+        .line {
+          fill: none;
+          stroke: steelblue;
+          stroke-width: 1.5px;
+        }
+
+        .area{
+            fill: steelblue;
+        }
+    </style>
+{% endblock %}
 
 {% block contenido %}
-    <p>Por desarrollar</p>
+    <div id="incidencias"></div>
+    <div id="ac-as"></div>
+{% endblock %}
+
+{% block scripts %}
+    <script src="http://d3js.org/d3.v3.min.js"></script>
+    <script>
+        // Variables globales
+        var margin = {top: 20, right: 20, bottom: 30, left: 50},
+            width = 960 - margin.left - margin.right,
+            height = 500 - margin.top - margin.bottom;
+        var parseDate = d3.time.format("%d-%m-%Y").parse;
+
+        function dibujar(elemento_html, path_data, etiqueta_ordenadas, primitiva_dibujar) {
+            /**
+              * Función abstracta que dibuja en elemento_html un gráfico establecido
+              * por primitiva_dibujar con los datos obtenidos desde path_data
+              */
+
+            // Declaramos los ejes y el elemento svg padre
+            var x = d3.time.scale()
+                .range([0, width]);
+
+            var y = d3.scale.linear()
+                .range([height, 0]);
+
+            var xAxis = d3.svg.axis()
+                .scale(x)
+                .orient("bottom");
+
+            var yAxis = d3.svg.axis()
+                .scale(y)
+                .orient("left");
+
+            var svg = d3.select(elemento_html).append("svg")
+                .attr("width", width + margin.left + margin.right)
+                .attr("height", height + margin.top + margin.bottom)
+              .append("g")
+                .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+            d3.csv(path_data, function(error, data) {
+              // Dibujamos el gráfico
+              primitiva_dibujar(svg, data, x, y);
+
+              // Dibujamos sus ejes
+              svg.append("g")
+                  .attr("class", "x axis")
+                  .attr("transform", "translate(0," + height + ")")
+                  .call(xAxis);
+              svg.append("g")
+                  .attr("class", "y axis")
+                  .call(yAxis)
+                .append("text")
+                  .attr("transform", "rotate(-90)")
+                  .attr("y", 6)
+                  .attr("dy", ".71em")
+                  .style("text-anchor", "end")
+                  .text(etiqueta_ordenadas);
+            });
+        }
+
+        // Dibuja el gráfico para la descripción de incidencias
+        dibujar("#incidencias", "/static/incidencias.csv", "# incidencias", function (svg, data, x, y){
+            // Procesamos los datos
+            data.forEach(function(d) {
+                d.fecha = parseDate(d.fecha);
+                d.nuevas = +d.nuevas;
+                d.cerradas = +d.cerradas;
+            });
+
+            // Establecemos el dominio de los dos ejes
+            y.domain([0, d3.max(data, function(d) { return d.totales > d.nuevas ? d.totales : d.nuevas; })]);
+            x.domain(d3.extent(data, function(d) { return d.fecha; }));
+
+            // Creamos la representación
+            var linea = d3.svg.line()
+                .x(function(d) { return x(d.fecha); })
+                .y(function(d) { return y(d.dato); });
+
+            // Dibujamos
+            svg.append("path")
+                .datum(data)
+                .attr("class", "line")
+                .attr("d", linea);
+        });
+
+        // Dibuja los gráficos para todos los cambios de estado
+        ["ac-as", "as-cp", "as-cte", "as-ctf", "cp-cte", "cp-ctf"].forEach(function (cambio_estado){
+            console.log(cambio_estado);
+            /*
+            // Dibuja los gráficos para un cambio de estado concreto
+            dibujar("#" + cambio_estado, "/static/" + cambio_estado + ".csv",
+                    "% acumulado", function (svg, data, x, y){
+                // Procesamos los datos
+                data.forEach(function(d) {
+                    d.fecha = parseDate(d.fecha);
+                    d.dato = +d.dato;
+                });
+
+                // Establecemos el dominio de los dos ejes
+                y.domain([0, d3.max(data, function(d) { return d.dato; })]);
+                x.domain(d3.extent(data, function(d) { return d.fecha; }));
+
+                // Creamos la representación
+                var area = d3.svg.area()
+                    .x(function(d) { return x(d.fecha); })
+                    .y1(function(d) { return y(d.dato); })
+                    .y0(height);
+
+                // Dibujamos
+                svg.append("path")
+                    .datum(data)
+                    .attr("class", "area")
+                    .attr("d", area);
+            });
+            */
+        });
+    </script>
 {% endblock %}
