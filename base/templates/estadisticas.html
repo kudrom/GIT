@@ -40,6 +40,15 @@
         .legend {
             font-size: 12px;
         }
+
+        h4{
+            display: inline;
+            margin: 5px 0;
+        }
+
+        .info span{
+            font-size: 16px;
+        }
     </style>
 {% endblock %}
 
@@ -47,6 +56,26 @@
     <h1>Estadísticas</h1>
     <div>
         <h2>Resumen de incidencias</h2>
+        <div class="info">
+            <h4>Número incidencias totales: </h4>
+            <span>{{ incidencias_totales }}</span>
+        </div>
+        <div class="info">
+            <h4>Número incidencias abiertas: </h4>
+            <span>{{ incidencias_abiertas }}</span>
+        </div>
+        <div class="info">
+            <h4>Número de técnicos registrados: </h4>
+            <span>{{ n_tecnicos }}</span>
+        </div>
+        <div class="info">
+            <h4>Número de supervisores registrados: </h4>
+            <span>{{ n_supervisores }}</span>
+        </div>
+        <div class="info">
+            <h4>Número de clientes registrados: </h4>
+            <span>{{ n_clientes }}</span>
+        </div>
         <div id="incidencias"></div>
     </div>
     <div>

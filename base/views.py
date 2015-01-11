@@ -326,6 +326,12 @@ def estadisticas(request):
     supervisores = Group.objects.get(name='supervisores')
 
     if supervisores in grupos:
+        incidencias = Incidencia.objects.all()
+        context['incidencias_totales'] = len(incidencias)
+        context['incidencias_abiertas'] = len(incidencias.filter(estado__in=['AC', 'AS', 'CP']))
+        context['n_supervisores'] = len(User.objects.filter(groups=supervisores))
+        context['n_tecnicos'] = len(User.objects.filter(groups=Group.objects.get(name="tecnicos")))
+        context['n_clientes'] = len(User.objects.filter(groups=Group.objects.get(name="clientes")))
         return render(request, 'estadisticas.html', context)
     else:
         return redirect('/')
@@ -338,12 +344,13 @@ def notificaciones(request):
     """
     grupos = request.user.groups.all()
     context = {'peticion': 'notificaciones', 'grupos': [g.name for g in grupos]}
-    context['notificaciones_badge'] = len(get_notificaciones(request.user))
     supervisores = Group.objects.get(name='supervisores')
     tecnicos = Group.objects.get(name='tecnicos')
 
     if supervisores in grupos or tecnicos in grupos:
-        context["notificaciones"] = get_notificaciones(request.user)
+        notificaciones = get_notificaciones(request.user)
+        context['notificaciones_badge'] = len(notificaciones)
+        context["notificaciones"] = notificaciones
         return render(request, 'notificaciones.html', context)
     else:
         return redirect('/')
