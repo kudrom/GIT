@@ -5,21 +5,22 @@
 {% endblock %}
 
 {% block contenido %}
-    <form>
+    <form method="post" action="/perfil">
+        {% csrf_token %}
         <div class="panel panel-default">
             <div class="panel-heading">Datos personales</div>
             <div class="panel-body">
                 <div class="form-group">
                     <label for="nombre">Nombre</label>
-                    <input type="text" class="form-control" id="nombre" placeholder="Introduce tu nombre" value="Fulanito">
+                    <input name="nombre" type="text" class="form-control" id="nombre" placeholder="Introduce tu nombre" value="{{ usuario.first_name }}">
                 </div>
                 <div class="form-group">
                     <label for="apellidos">Apellidos</label>
-                    <input type="text" class="form-control" id="apellidos" placeholder="Introduce tus apellidos">
+                    <input name="apellidos" type="text" class="form-control" id="apellidos" placeholder="Introduce tus apellidos" value="{{ usuario.last_name }}">
                 </div>
                 <div class="form-group">
                     <label for="email">Dirección de email</label>
-                    <input type="email" class="form-control" id="email" placeholder="Introduce tu email">
+                    <input name="email" type="email" class="form-control" id="email" placeholder="Introduce tu email" value="{{ usuario.email }}">
                 </div>
             </div>
         </div>
@@ -28,11 +29,11 @@
             <div class="panel-body">
                 <div class="form-group">
                     <label for="password-actual">Contraseña actual</label>
-                    <input type="password" class="form-control" id="password-actual" placeholder="Introduce tu constraseña actual">
+                    <input name="password-actual" type="password" class="form-control" id="password-actual" placeholder="Introduce tu constraseña actual">
                 </div>
                 <div class="form-group">
                     <label for="password-nuevo">Nueva contraseña</label>
-                    <input type="password" class="form-control" id="password-nuevo" placeholder="Introduce tu nueva constraseña">
+                    <input name="password-nuevo" type="password" class="form-control" id="password-nuevo" placeholder="Introduce tu nueva constraseña">
                 </div>
             </div>
         </div>

@@ -137,8 +137,20 @@ def perfil(request):
     grupos = [g.name for g in request.user.groups.all()]
     context = {'peticion': 'perfil', 'grupos': grupos}
     context['notificaciones_badge'] = len(get_notificaciones(request.user))
+    context['usuario'] = request.user
 
-    return render(request, 'perfil.html', context)
+    if request.method == 'GET':
+        return render(request, 'perfil.html', context)
+    else:
+        # Procesar el cambio de los datos
+        request.user.first_name = request.POST['nombre']
+        request.user.last_name = request.POST['apellidos']
+        request.user.email = request.POST['email']
+        if len(request.POST['password-nuevo']) > 0 and request.user.check_password(request.POST['password-actual']):
+            request.user.set_password(request.POST['password-nuevo'])
+        request.user.save()
+        request.POST = None
+        return render(request, 'perfil.html', context)
 
 @login_required
 def ayuda(request):
