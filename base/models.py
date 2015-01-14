@@ -59,3 +59,38 @@ class Comentario(models.Model):
     fecha = models.DateTimeField(default=timezone.now)
     incidencia = models.ForeignKey(Incidencia, null=True, blank=True)
     usuario = models.ForeignKey(User, null=True, blank=True)
+
+@receiver(post_save, sender=Incidencia)
+def desencadenar_cambios_estado(sender, instance, created, raw, using, update_fields, **kwargs):
+    """
+        Handler que registra frente a la base de datos los cambios de estado necesarios
+        a medida que se van produciendo.
+    """
+    cambio_estado = CambioEstado(incidencia=instance,
+                                 nuevo=True)
+    if instance.estado == 'AC' and len(CambioEstado.objects.filter(incidencia=instance, estado_inicial='SO')) == 0:
+        cambio_estado.usuario = instance.autor
+    elif instance.estado == 'AS':
+        cambio_estado.usuario = instance.supervisor
+        cambio_estado.estado_inicial = 'AC'
+        cambio_estado.estado_final = 'AS'
+    elif instance.estado == 'CP':
+        cambio_estado.usuario = instance.autor
+        cambio_estado.estado_inicial = 'AS'
+        cambio_estado.estado_final = 'CP'
+    elif instance.estado.startswith('CT'):
+        cambio_estado.usuario = instance.tecnico_asignado
+        if len(CambioEstado.objects.filter(incidencia=instance, estado_final='CP')) > 0:
+            cambio_estado.estado_inicial = 'CP'
+        else:
+            cambio_estado.estado_inicial = 'AS'
+        if instance.estado == 'CTE':
+            cambio_estado.estado_final = 'CTE'
+        elif instance.estado == 'CTF':
+            cambio_estado.estado_final = 'CTF'
+        else:
+            return
+    else:
+        return
+
+    cambio_estado.save()

@@ -178,12 +178,6 @@ def incidencia(request, id_incidencia):
                 incidencia.estado = 'AS'
                 incidencia.supervisor = request.user
                 incidencia.save()
-                cambio_estado = CambioEstado(incidencia=incidencia,
-                                             usuario=request.user,
-                                             estado_inicial='AC',
-                                             estado_final='AS',
-                                             nuevo=True)
-                cambio_estado.save()
                 return redirect('/incidencia/' + str(id_incidencia))
             # Si algún campo del formulario del supervisor es inválido
             else:
@@ -221,16 +215,10 @@ def cerrar(request):
         if tecnicos in grupos and incidencia.tecnico_asignado == request.user:
             # Si el estado de la incidencia es consistente
             if incidencia.estado == 'AS' or incidencia.estado == 'CP':
-                cambio_estado = CambioEstado(incidencia=incidencia,
-                                             usuario=request.user,
-                                             estado_inicial=incidencia.estado,
-                                             nuevo=True)
                 if 'exito' == request.GET['tipo']:
                     incidencia.estado = 'CTE'
-                    cambio_estado.estado_final = 'CTE'
                 elif 'fracaso' == request.GET['tipo']:
                     incidencia.estado = 'CTF'
-                    cambio_estado.estado_final = 'CTF'
                 else:
                     return redirect('/incidencia/' + str(incidencia.id))
             else:
@@ -238,17 +226,11 @@ def cerrar(request):
         elif clientes in grupos and incidencia.autor == request.user:
             if 'prematuro' == request.GET['tipo'] and incidencia.estado in ['AS', 'AC']:
                 incidencia.estado = 'CP'
-                cambio_estado = CambioEstado(incidencia=incidencia,
-                                             usuario=request.user,
-                                             estado_inicial='AS',
-                                             estado_final='CP',
-                                             nuevo=True)
             else:
                 return redirect('/error/cerrar-invalido')
         else:
             return redirect('/error/sin-permisos')
         incidencia.save()
-        cambio_estado.save()
     else:
         return redirect('/')
     return redirect('/incidencia/' + str(id_incidencia))
@@ -297,10 +279,6 @@ def nueva_incidencia(request):
                 # Si la incidencia se ha podido guardar es inmediatamente aceptada
                 incidencia.estado = 'AC'
                 incidencia.save()
-                cambio_estado = CambioEstado(incidencia=incidencia,
-                                             usuario=incidencia.autor,
-                                             nuevo=True)
-                cambio_estado.save()
                 return redirect('/incidencia/' + str(incidencia.id))
             # Si algún campo del formulario es inválido
             else:
